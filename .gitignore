@@ -1,6 +1,13 @@
+# PNPM
 node_modules
 
+# Build Files
 /.cache
 /build
 /public/build
+
+# Environment
 .env
+
+# Prisma
+/prisma/dev.db
