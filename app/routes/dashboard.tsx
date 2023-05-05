@@ -1,11 +1,20 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Link, Outlet } from "@remix-run/react";
-import { LayersIcon } from "lucide-react";
+import {
+  FilesIcon,
+  ImageIcon,
+  LayersIcon,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react";
 import UserAvatar from "~/components/user-avatar";
+import { requireUser } from "~/session.server";
 
-export const loader = async ({}: LoaderArgs) => {
-  return json({});
+export const loader = async ({ request }: LoaderArgs) => {
+  const user = await requireUser(request);
+  if (!user) return redirect("/login");
+  return json({ user });
 };
 
 export const action = async ({}: ActionArgs) => {
@@ -15,20 +24,21 @@ export const action = async ({}: ActionArgs) => {
 export default function DashboardLayout() {
   return (
     <div>
-      <div className="lg:ml-72 xl:ml-80">
+      {/* TODO: Refactor */}
+      <div className="lg:ml-64">
         {/* Top Navbar */}
         <header className="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
           <div className="contents lg:pointer-events-auto lg:block lg:w-64 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10">
             <div className="hidden lg:flex">
-              <a aria-label="Home" href="/">
+              <Link aria-label="Home" to="/dashboard">
                 <span className="flex justify-start items-center">
                   <LayersIcon
                     className="h-6 w-6 mr-4 inline-block text-emerald-400"
                     aria-hidden="true"
                   />
-                  Content Layer
+                  ForgeCMS
                 </span>
-              </a>
+              </Link>
             </div>
 
             <div className="fixed border-b border-zinc-800 inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-64 lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]">
@@ -36,7 +46,7 @@ export default function DashboardLayout() {
               <div className="hidden lg:block lg:max-w-md lg:flex-auto">
                 <button
                   type="button"
-                  className="hidden h-8 w-full items-center gap-2 rounded-full bg-white pl-2 pr-3 text-sm text-zinc-500 ring-1 ring-zinc-900/10 transition hover:ring-zinc-900/20 dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 lg:flex focus:[&amp;:not(:focus-visible)]:outline-none"
+                  className="hidden h-8 w-full items-center gap-2 bg-white pl-2 pr-3 text-sm text-zinc-500 ring-1 ring-zinc-900/10 transition hover:ring-zinc-900/20 dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 lg:flex focus:[&amp;:not(:focus-visible)]:outline-none"
                 >
                   <svg
                     viewBox="0 0 20 20"
@@ -64,7 +74,7 @@ export default function DashboardLayout() {
                       className="h-6 w-6 mr-4 inline-block text-emerald-400"
                       aria-hidden="true"
                     />
-                    Content Layer
+                    ForgeCMS
                   </span>
                 </a>
               </div>
@@ -107,46 +117,48 @@ export default function DashboardLayout() {
             <nav className="hidden lg:mt-10 lg:block">
               <ul role="list">
                 {/* Any Auxiliary Nav Links can go here for mobile */}
-                <li className="relative mt-6 md:mt-0">
-                  <h2 className="font-light text-zinc-900 dark:text-white">
-                    Content
-                  </h2>
-                  <div className="relative mt-3 pl-2">
-                    <ul role="list">
-                      <li className="relative border-l border-emerald-500">
-                        <a
-                          aria-current="page"
-                          className="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-900 dark:text-white"
-                          href="/"
-                        >
-                          <span className="truncate">Articles</span>
-                        </a>
-                      </li>
-                      <li className="relative">
-                        <a
-                          className="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                          href="/quickstart"
-                        >
-                          <span className="truncate">Pages</span>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-                <li className="relative mt-6">
+                <li className="relative mt-3 md:mt-0 flex">
                   <Link
-                    to="users"
-                    className="font-light text-zinc-900 dark:text-white"
+                    to="content"
+                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
                   >
-                    Users
+                    <span className="flex justify-start items-center">
+                      <FilesIcon className="w-5 h-5 text-emerald-400 mr-2" />
+                      Content
+                    </span>
                   </Link>
                 </li>
-                <li className="relative mt-6">
+                <li className="relative mt-3 flex">
+                  <Link
+                    to="media"
+                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
+                  >
+                    <span className="flex justify-start items-center">
+                      <ImageIcon className="w-5 h-5 text-emerald-400 mr-2" />
+                      Media
+                    </span>
+                  </Link>
+                </li>
+                <li className="relative mt-3 flex">
+                  <Link
+                    to="users"
+                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
+                  >
+                    <span className="flex justify-start items-center">
+                      <UsersIcon className="w-5 h-5 text-emerald-400 mr-2" />
+                      Users
+                    </span>
+                  </Link>
+                </li>
+                <li className="relative mt-3 flex">
                   <Link
                     to="settings"
-                    className="font-light text-zinc-900 dark:text-white"
+                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
                   >
-                    Settings
+                    <span className="flex justify-start items-center">
+                      <SettingsIcon className="w-5 h-5 text-emerald-500 mr-2" />
+                      Settings
+                    </span>
                   </Link>
                 </li>
                 <li className="sticky bottom-0 z-10 mt-6 min-[416px]:hidden">
@@ -162,8 +174,8 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <div className="h-screen flex relative px-4 pt-14 sm:px-6 lg:px-8">
-          <main className="py-16 flex flex-1">
+        <div className="h-screen relative px-4 pt-14 sm:px-6 lg:px-8">
+          <main className="py-4 sm:py-6 lg:py-8">
             <Outlet />
           </main>
         </div>
