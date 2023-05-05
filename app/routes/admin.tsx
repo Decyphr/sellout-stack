@@ -1,15 +1,18 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Link, Outlet } from "@remix-run/react";
-import {
-  FilesIcon,
-  ImageIcon,
-  LayersIcon,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react";
+import { LayersIcon } from "lucide-react";
+import Sidebar from "~/components/navs/sidebar";
 import UserAvatar from "~/components/user-avatar";
 import { requireUser } from "~/session.server";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await requireUser(request);
@@ -21,16 +24,15 @@ export const action = async ({}: ActionArgs) => {
   return redirect("");
 };
 
-export default function DashboardLayout() {
+export default function AdminLayout() {
   return (
     <div>
-      {/* TODO: Refactor */}
       <div className="lg:ml-64">
         {/* Top Navbar */}
         <header className="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
-          <div className="contents lg:pointer-events-auto lg:block lg:w-64 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10">
+          <div className="contents lg:pointer-events-auto lg:block lg:w-64 lg:overflow-y-auto lg:border-r lg:border-foreground/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10">
             <div className="hidden lg:flex">
-              <Link aria-label="Home" to="/dashboard">
+              <Link aria-label="Home" to="/admin">
                 <span className="flex justify-start items-center">
                   <LayersIcon
                     className="h-6 w-6 mr-4 inline-block text-emerald-400"
@@ -41,7 +43,7 @@ export default function DashboardLayout() {
               </Link>
             </div>
 
-            <div className="fixed border-b border-zinc-800 inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-64 lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]">
+            <div className="fixed border-b border-foreground/10 inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-64 lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]">
               <div className="absolute inset-x-0 top-full h-px transition bg-zinc-900/7.5 dark:bg-white/7.5"></div>
               <div className="hidden lg:block lg:max-w-md lg:flex-auto">
                 <button
@@ -108,69 +110,24 @@ export default function DashboardLayout() {
                   </div>
                 </div>
                 <div className="hidden min-[416px]:contents">
-                  <Link to="account">
-                    <UserAvatar />
-                  </Link>
+                  <DropdownMenu className="transform-none">
+                    <DropdownMenuTrigger>
+                      <UserAvatar />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>
+                        <Link to="/account-settings">Account</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link to="/logout">Logout</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
-            <nav className="hidden lg:mt-10 lg:block">
-              <ul role="list">
-                {/* Any Auxiliary Nav Links can go here for mobile */}
-                <li className="relative mt-3 md:mt-0 flex">
-                  <Link
-                    to="content"
-                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
-                  >
-                    <span className="flex justify-start items-center">
-                      <FilesIcon className="w-5 h-5 text-emerald-400 mr-2" />
-                      Content
-                    </span>
-                  </Link>
-                </li>
-                <li className="relative mt-3 flex">
-                  <Link
-                    to="media"
-                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
-                  >
-                    <span className="flex justify-start items-center">
-                      <ImageIcon className="w-5 h-5 text-emerald-400 mr-2" />
-                      Media
-                    </span>
-                  </Link>
-                </li>
-                <li className="relative mt-3 flex">
-                  <Link
-                    to="users"
-                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
-                  >
-                    <span className="flex justify-start items-center">
-                      <UsersIcon className="w-5 h-5 text-emerald-400 mr-2" />
-                      Users
-                    </span>
-                  </Link>
-                </li>
-                <li className="relative mt-3 flex">
-                  <Link
-                    to="settings"
-                    className="flex-1 font-light text-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-sm p-2"
-                  >
-                    <span className="flex justify-start items-center">
-                      <SettingsIcon className="w-5 h-5 text-emerald-500 mr-2" />
-                      Settings
-                    </span>
-                  </Link>
-                </li>
-                <li className="sticky bottom-0 z-10 mt-6 min-[416px]:hidden">
-                  <a
-                    className="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-zinc-900 py-1 px-3 text-white hover:bg-zinc-700 dark:bg-emerald-500 dark:text-white dark:hover:bg-emerald-400 w-full"
-                    href="/#"
-                  >
-                    <UserAvatar /> Account
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            <Sidebar />
           </div>
         </header>
 

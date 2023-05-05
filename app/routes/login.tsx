@@ -34,7 +34,7 @@ const mutation = makeDomainFunction(schema)(async (values) => {
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
-  if (userId) return redirect("/dashboard");
+  if (userId) return redirect("/admin");
   return json({});
 };
 
@@ -44,7 +44,7 @@ export const action = async ({ request }: ActionArgs) => {
   if (!result.success) return json(result, { status: 400 });
 
   return createUserSession({
-    redirectTo: result.data.redirectTo || "/dashboard",
+    redirectTo: result.data.redirectTo || "/admin",
     remember: result.data.remember === "on" ? true : false,
     request,
     userId: result.data.userId,
@@ -55,7 +55,7 @@ export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginRoute() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = searchParams.get("redirectTo") || "/admin";
 
   return (
     <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">

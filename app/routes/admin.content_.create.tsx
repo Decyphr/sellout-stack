@@ -27,7 +27,7 @@ export const action = async ({ request }: ActionArgs) =>
     request,
     schema,
     mutation,
-    successPath: "/dashboard/content",
+    successPath: "/admin/content",
   });
 
 export default function CreateContentRoute() {

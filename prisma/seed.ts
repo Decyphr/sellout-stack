@@ -14,6 +14,7 @@ async function seed() {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // create a new user
   const user = await prisma.user.create({
     data: {
       email,
@@ -21,6 +22,24 @@ async function seed() {
         create: {
           hash: hashedPassword,
         },
+      },
+    },
+  });
+
+  // create a new content type
+  const contentType = await prisma.contentType.create({
+    data: {
+      title: "Articles",
+      handle: "articles",
+      fields: {
+        create: [
+          {
+            title: "Body",
+            handle: "body",
+            type: "text",
+            sortOrder: 1,
+          },
+        ],
       },
     },
   });

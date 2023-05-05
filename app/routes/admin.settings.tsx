@@ -9,6 +9,6 @@ export const action = async ({}: ActionArgs) => {
   return redirect("");
 };
 
-export default function ContentRoute() {
-  return <div>Content</div>;
+export default function SettingsRoute() {
+  return <div>Settings</div>;
 }
