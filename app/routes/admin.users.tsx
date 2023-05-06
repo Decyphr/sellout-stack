@@ -1,6 +1,6 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import DataTable from "~/components/data-list";
+import { RouteTitle } from "~/components/route-title";
 
 export const loader = async ({}: LoaderArgs) => {
   return json({});
@@ -29,5 +29,9 @@ export default function UserRoute() {
     },
   ];
 
-  return <DataTable data={data} />;
+  return (
+    <div>
+      <RouteTitle title="Users" />
+    </div>
+  );
 }

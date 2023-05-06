@@ -1,5 +1,6 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
+import { RouteTitle } from "~/components/route-title";
 
 export const loader = async ({}: LoaderArgs) => {
   return json({});
@@ -10,5 +11,9 @@ export const action = async ({}: ActionArgs) => {
 };
 
 export default function SettingsRoute() {
-  return <div>Settings</div>;
+  return (
+    <div>
+      <RouteTitle title="Settings" />
+    </div>
+  );
 }

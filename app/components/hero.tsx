@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 
 const Hero = () => {
   return (
-    <div className="bg-white dark:bg-zinc-900">
+    <div className="bg-white h-screen w-full dark:bg-zinc-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto py-16 sm:py-24 lg:py-32 lg:max-w-none">
           <h2 className="text-4xl font-extrabold text-zinc-900 dark:text-white sm:text-5xl lg:text-6xl">

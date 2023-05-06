@@ -46,12 +46,11 @@ const SideBarLink = ({
   href: string;
   children: React.ReactNode;
 }) => {
-  const baseClass = "flex-1 font-light transition-colors p-2";
-  const linkClass =
-    "text-primary/80 hover:text-primary hover:bg-foreground/5 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 dark:focus:bg-zinc-800 dark:focus:text-white";
+  const baseClass =
+    "flex-1 font-light transition-colors p-2 focus:bg-foreground/20 focus:text-primary";
+  const linkClass = "text-primary/80 hover:text-primary hover:bg-foreground/5";
 
-  const activeLinkClass =
-    "text-secondary bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-indigo-500 dark:to-indigo-600 dark:text-white dark:focus:bg-zinc-800 dark:focus:text-white";
+  const activeLinkClass = "text-primary bg-foreground/20";
 
   return (
     <li className="relative mt-3 flex">
