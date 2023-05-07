@@ -1,4 +1,4 @@
-export default [
+const schema: ContentType[] = [
   {
     title: "Articles",
     handle: "articles",
@@ -62,3 +62,5 @@ export default [
     ],
   },
 ];
+
+export default schema;
