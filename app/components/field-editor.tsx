@@ -52,10 +52,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({
         <div className="grid gap-4 py-4">
           <Form
             schema={createFieldSchema}
-            hiddenFields={["_action", "contentTypeId", "sortOrder"]}
+            hiddenFields={["_action", "sortOrder"]}
             values={{
               _action: "createField",
-              contentTypeId,
               sortOrder,
             }}
           >
@@ -68,12 +67,6 @@ const FieldEditor: React.FC<FieldEditorProps> = ({
                   defaultValue="createField"
                 />
                 <Field
-                  name="contentTypeId"
-                  type="hidden"
-                  className="hidden"
-                  defaultValue={contentTypeId}
-                />
-                <Field
                   name="sortOrder"
                   type="hidden"
                   className="hidden"
@@ -84,6 +77,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({
                     <>
                       <Label>Field Type</Label>
                       <Select
+                        name="type"
                         onValueChange={(value: string) =>
                           setValue("type", value, { shouldValidate: true })
                         }
@@ -114,13 +108,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({
                         Title
                       </Label>
                       <Input {...register("title")} />
+                      <Errors />
                     </>
                   )}
                 </Field>
-                <Button type="submit" name="_action" value="create-field">
+                <Button type="submit" name="_action" value="createField">
                   Create Field
                 </Button>
-                <Errors />
+                <Errors className="text-red-400" />
               </>
             )}
           </Form>

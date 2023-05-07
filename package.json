@@ -6,9 +6,7 @@
     "deploy": "fly deploy --remote-only",
     "dev": "remix dev",
     "start": "remix-serve build",
-    "typecheck": "tsc",
-    "db:seed": "npx prisma db seed",
-    "db:studio": "npx prisma studio"
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@prisma/client": "^4.13.0",

@@ -27,7 +27,7 @@ async function seed() {
   });
 
   // create a new content type
-  const contentType = await prisma.contentType.create({
+  /* const contentType = await prisma.contentType.create({
     data: {
       title: "Articles",
       handle: "articles",
@@ -42,7 +42,7 @@ async function seed() {
         ],
       },
     },
-  });
+  }); */
 
   console.log(`Database has been seeded. 🌱`);
 }
