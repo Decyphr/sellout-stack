@@ -10,6 +10,7 @@ export const loader = async ({ params }: LoaderArgs) => {
   const entry = await getEntryById(params.entryId);
 
   if (!entry) return redirect("/admin/content");
+
   return json({ entry });
 };
 
@@ -20,5 +21,17 @@ export const action = async ({}: ActionArgs) => {
 export default function EntryEditRoute() {
   const { entry } = useLoaderData<typeof loader>();
 
-  return <div>{entry.id}</div>;
+  return (
+    <div>
+      <ul>
+        {entry.fields
+          .sort((a, b) => a.field.sortOrder - b.field.sortOrder)
+          .map((field) => (
+            <li key={field.id}>
+              {field.field.title} - {field.field.type}
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
 }

@@ -58,6 +58,10 @@ export async function createContentType(
   });
 }
 
+export async function deleteContentType(id: ContentType["id"]) {
+  return prisma.contentType.delete({ where: { id } });
+}
+
 export async function updateContentTypeFields(
   contentTypeId: string,
   fields: FieldData[]
@@ -83,20 +87,21 @@ export async function updateContentTypeFields(
 
   // Create or update the remaining fields
   await Promise.all(
-    fields.map(async (field) => {
+    fields.map((field) => {
       const existingField = existingFields.find(
         (existingField) => existingField.handle === field.handle
       );
 
       if (existingField) {
-        // The field already exists, update it
-        await prisma.field.update({
+        console.log("Updating field: ", field.handle);
+        prisma.field.update({
           where: { id: existingField.id },
           data: field,
         });
       } else {
-        // The field is new, create it
-        await prisma.field.create({
+        console.log("Creating field: ", field.handle);
+
+        prisma.field.create({
           data: { ...field, contentTypeId },
         });
       }
@@ -106,7 +111,18 @@ export async function updateContentTypeFields(
 
 // Entries
 export async function getEntryById(id: Entry["id"]) {
-  return prisma.entry.findUnique({ where: { id } });
+  return prisma.entry.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      fields: {
+        select: {
+          id: true,
+          field: true,
+        },
+      },
+    },
+  });
 }
 
 export async function createEntry(contentTypeId: ContentType["id"]) {
