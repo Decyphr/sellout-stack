@@ -1,29 +1,15 @@
-type FieldType =
-  | "text"
-  | "boolean"
-  | "number"
-  | "richtext"
-  | "select"
-  | "media"
-  | "datetime"
-  | "relation";
+import type { ContentType, Field } from "~/models/content.server";
 
-// based on our prisma schema
-interface ContentType {
-  title: string;
-  handle: string;
-  description?: string;
-  fields: Field[];
-}
+// schema type based on partial content type and field types with optional isRequired and description
 
-interface Field {
-  title: string;
-  handle: string;
-  type: string;
-  description?: string;
-  isRequired?: boolean;
-}
-
-interface FieldOptions {
-  // TODO: add options for all different field types
-}
+export type SchemaType = Array<
+  Pick<ContentType, "title" | "handle"> & {
+    description?: ContentType["description"];
+    fields: Array<
+      Pick<Field, "title" | "handle" | "type"> & {
+        description?: Field["description"];
+        isRequired?: Field["isRequired"];
+      }
+    >;
+  }
+>;

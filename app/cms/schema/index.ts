@@ -1,8 +1,10 @@
-const schema: ContentType[] = [
+import { SchemaType } from "@cms/types";
+
+const schema: SchemaType = [
   {
     title: "Pages",
     handle: "pages",
-    description: "A collection of web pages",
+    description: "A collection of pages",
     fields: [
       {
         title: "Title",
@@ -17,16 +19,57 @@ const schema: ContentType[] = [
         isRequired: true,
       },
       {
-        title: "Featured Image",
-        handle: "featuredImage",
-        type: "media",
+        title: "Content",
+        handle: "content",
+        type: "richtext",
+        description: "The main content of the page",
         isRequired: true,
       },
       {
-        title: "Body",
-        handle: "body",
-        type: "richtext",
+        title: "SEO",
+        handle: "seo",
+        type: "text",
+      },
+      {
+        title: "Open Graph",
+        handle: "openGraph",
+        type: "text",
+      },
+    ],
+  },
+  {
+    title: "Posts",
+    handle: "posts",
+    description: "A collection of posts",
+    fields: [
+      {
+        title: "Title",
+        handle: "title",
+        type: "text",
         isRequired: true,
+      },
+      {
+        title: "Slug",
+        handle: "slug",
+        type: "text",
+        isRequired: true,
+      },
+      {
+        title: "Content",
+        handle: "content",
+        type: "richtext",
+        description: "The main content of the post",
+        isRequired: true,
+      },
+      {
+        title: "SEO",
+        handle: "seo",
+        type: "text",
+      },
+      {
+        title: "Open Graph",
+        handle: "openGraph",
+        type: "text",
       },
     ],
   },

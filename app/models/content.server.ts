@@ -18,12 +18,18 @@ type FieldData = Pick<Field, "title" | "handle" | "type" | "sortOrder"> & {
   description?: Field["description"];
   isRequired?: Field["isRequired"];
 };
-
 // Content Type
 export async function getAllContentTypes() {
   return prisma.contentType.findMany({
     orderBy: { title: "asc" },
-    select: { id: true, title: true, handle: true },
+    select: {
+      id: true,
+      title: true,
+      handle: true,
+      description: true,
+      fields: true,
+      entries: true,
+    },
   });
 }
 
@@ -43,70 +49,86 @@ export async function getContentTypeByHandle(handle: ContentType["handle"]) {
 }
 
 export async function createContentType(
-  title: ContentType["title"],
-  handle: ContentType["handle"],
+  contentType: Pick<ContentType, "title" | "handle"> & {
+    description?: ContentType["description"];
+  },
   fields: FieldData[]
 ) {
   return prisma.contentType.create({
     data: {
-      title,
-      handle,
+      ...contentType,
       fields: {
-        create: fields.map((field) => ({ ...field })),
+        create: fields,
       },
     },
   });
 }
 
-export async function deleteContentType(id: ContentType["id"]) {
-  return prisma.contentType.delete({ where: { id } });
+export async function updateContentType(
+  contentType: Pick<ContentType, "id" | "title" | "handle"> & {
+    description?: ContentType["description"];
+  }
+) {
+  return prisma.contentType.update({
+    where: { id: contentType.id },
+    data: {
+      title: contentType.title,
+      description: contentType.description,
+    },
+  });
 }
 
-export async function updateContentTypeFields(
-  contentTypeId: string,
-  fields: FieldData[]
+export async function deleteContentTypes(
+  contentTypesToDelete: ContentType["id"][]
 ) {
-  // Get the existing fields for the Content Type
-  const existingFields = await prisma.field.findMany({
-    where: { contentTypeId },
-    select: { id: true, handle: true },
+  return prisma.contentType.deleteMany({
+    where: {
+      id: {
+        in: contentTypesToDelete,
+      },
+    },
   });
+}
 
-  // Filter out the fields that don't exist anymore
-  const fieldsToDelete = existingFields.filter(
-    (existingField) =>
-      !fields.some((field) => field.handle === existingField.handle)
-  );
+// Fields
+export async function createField(
+  field: FieldData,
+  contentTypeId: ContentType["id"]
+) {
+  // only create a field if content type is being updated
+  return prisma.field.create({
+    data: {
+      contentTypeId,
+      ...field,
+    },
+  });
+}
 
-  // Delete the fields that don't exist anymore
-  await Promise.all(
-    fieldsToDelete.map((field) =>
-      prisma.field.delete({ where: { id: field.id } })
-    )
-  );
+export async function updateField(
+  fieldId: Field["id"],
+  fieldToUpdate: FieldData
+) {
+  return prisma.field.update({
+    where: { id: fieldId },
+    data: {
+      title: fieldToUpdate.title,
+      handle: fieldToUpdate.handle,
+      type: fieldToUpdate.type,
+      description: fieldToUpdate.description,
+      isRequired: fieldToUpdate.isRequired,
+      sortOrder: fieldToUpdate.sortOrder,
+    },
+  });
+}
 
-  // Create or update the remaining fields
-  await Promise.all(
-    fields.map((field) => {
-      const existingField = existingFields.find(
-        (existingField) => existingField.handle === field.handle
-      );
-
-      if (existingField) {
-        console.log("Updating field: ", field.handle);
-        prisma.field.update({
-          where: { id: existingField.id },
-          data: field,
-        });
-      } else {
-        console.log("Creating field: ", field.handle);
-
-        prisma.field.create({
-          data: { ...field, contentTypeId },
-        });
-      }
-    })
-  );
+export async function deleteFields(fieldsToDelete: Field["id"][]) {
+  return prisma.field.deleteMany({
+    where: {
+      id: {
+        in: fieldsToDelete,
+      },
+    },
+  });
 }
 
 // Entries
@@ -120,6 +142,7 @@ export async function getEntryById(id: Entry["id"]) {
           id: true,
           field: true,
         },
+        orderBy: { field: { sortOrder: "asc" } },
       },
     },
   });
@@ -139,4 +162,34 @@ export async function createEntry(contentTypeId: ContentType["id"]) {
       },
     },
   });
+}
+
+// returns a promise for each entry
+export async function addNewFieldsToEntries(
+  contentTypeId: ContentType["id"],
+  fieldsToCreate: Field["id"][]
+) {
+  const entries = await prisma.entry.findMany({
+    where: { contentTypeId },
+  });
+
+  try {
+    await Promise.all(
+      entries.map((entry) =>
+        prisma.entry.update({
+          where: { id: entry.id },
+          data: {
+            fields: {
+              create: fieldsToCreate.map((fieldId) => ({ fieldId })),
+            },
+          },
+        })
+      )
+    );
+
+    return;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error adding new fields to entries");
+  }
 }
