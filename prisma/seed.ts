@@ -27,7 +27,7 @@ async function seed() {
   });
 
   // create a new content type
-  /* const contentType = await prisma.contentType.create({
+  /* const collection = await prisma.collection.create({
     data: {
       title: "Articles",
       handle: "articles",

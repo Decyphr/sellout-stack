@@ -24,28 +24,15 @@ model Password {
   userId String @unique
 }
 
-model ProjectConfig {
-  id            String     @id @default(cuid())
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime?  @updatedAt
-
-  version       BigInt     @default(1)
-  
-  contentTypes  ContentType[]
-}
-
-// Define the model for content types
-model ContentType {
+// Define the model for collections
+model Collection {
   id            String     @id @default(cuid())
   createdAt     DateTime   @default(now())
   updatedAt     DateTime?  @updatedAt
 
   title         String
   handle        String     @unique
-  description   String?
-
-  projectConfigId String
-  projectConfig   ProjectConfig @relation(fields: [projectConfigId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  description   String?    @default("")
   
   fields            Field[]
   entries           Entry[]
@@ -65,13 +52,13 @@ model Field {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime?  @updatedAt
   
-  contentTypeId String
-  contentType   ContentType @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
   options       FieldOptions[]
   values        FieldValue[]
 
-  @@unique([contentTypeId, handle])
+  @@unique([collectionId, handle])
 }
 
 model FieldOptions {
@@ -84,12 +71,12 @@ model FieldOptions {
 }
 
 model Entry {
-  id            String       @id @default(cuid())
+  id            String     @id @default(cuid())
   createdAt     DateTime   @default(now())
   updatedAt     DateTime?  @updatedAt
 
-  contentTypeId String
-  contentType   ContentType  @relation(fields: [contentTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  collectionId String
+  collection   Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   fields        FieldValue[]
 }

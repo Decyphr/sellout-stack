@@ -5,16 +5,16 @@ import { json, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { PlusIcon } from "lucide-react";
 import invariant from "tiny-invariant";
-import { createEntry, getContentTypeById } from "~/models/content.server";
+import { createEntry, getCollectionById } from "~/models/content.server";
 
 export const loader = async ({ params }: LoaderArgs) => {
   invariant(params.id, "Missing content type id");
 
-  const contentType = await getContentTypeById(params.id);
+  const collection = await getCollectionById(params.id);
 
-  if (!contentType) return redirect("/admin/content");
+  if (!collection) return redirect("/admin/content");
 
-  return json({ contentType });
+  return json({ collection });
 };
 
 export const action = async ({ params }: ActionArgs) => {
@@ -29,12 +29,12 @@ export const action = async ({ params }: ActionArgs) => {
   }
 };
 
-export default function ContentTypeRoute() {
-  const { contentType } = useLoaderData<typeof loader>();
+export default function CollectionRoute() {
+  const { collection } = useLoaderData<typeof loader>();
 
   return (
     <div>
-      <RouteTitle title={contentType.title}>
+      <RouteTitle title={collection.title}>
         <Form method="post">
           <Button type="submit">
             <PlusIcon className="w-4 h-4 mr-2" />
@@ -43,7 +43,7 @@ export default function ContentTypeRoute() {
         </Form>
       </RouteTitle>
       <ul>
-        {contentType.entries.map((entry) => (
+        {collection.entries.map((entry) => (
           <li key={entry.id}>
             <Link to={entry.id}>{entry.id}</Link>
           </li>

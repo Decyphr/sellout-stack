@@ -5,12 +5,12 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { PlusIcon } from "lucide-react";
-import { getAllContentTypes } from "~/models/content.server";
+import { getAllCollections } from "~/models/content.server";
 
 export const loader = async ({}: LoaderArgs) => {
-  const contentTypes = await getAllContentTypes();
+  const collections = await getAllCollections();
 
-  return json({ contentTypes });
+  return json({ collections });
 };
 
 export const action = async ({}: ActionArgs) => {
@@ -18,7 +18,7 @@ export const action = async ({}: ActionArgs) => {
 };
 
 export default function ContentRoute() {
-  const { contentTypes } = useLoaderData<typeof loader>();
+  const { collections } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -28,11 +28,11 @@ export default function ContentRoute() {
         </Button>
       </RouteTitle>
       <div className="grid gap-4 md:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {contentTypes.map((contentType) => (
+        {collections.map((collection) => (
           <SimpleCard
-            key={contentType.id}
-            title={contentType.title}
-            link={contentType.id}
+            key={collection.id}
+            title={collection.title}
+            link={collection.id}
           />
         ))}
       </div>

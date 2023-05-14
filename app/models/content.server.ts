@@ -1,7 +1,8 @@
-import type { ContentType, Entry, Field } from "@prisma/client";
+import type { Collection, Entry, Field } from "@prisma/client";
+import { toCamelCase } from "~/cms/lib/utils/formatters";
 import { prisma } from "~/db.server";
 
-export type { ContentType, Entry, Field } from "@prisma/client";
+export type { Collection, Entry, Field } from "@prisma/client";
 
 export const FIELD_TYPES = [
   "boolean",
@@ -19,8 +20,8 @@ type FieldData = Pick<Field, "title" | "handle" | "type" | "sortOrder"> & {
   isRequired?: Field["isRequired"];
 };
 // Content Type
-export async function getAllContentTypes() {
-  return prisma.contentType.findMany({
+export async function getAllCollections() {
+  return prisma.collection.findMany({
     orderBy: { title: "asc" },
     select: {
       id: true,
@@ -33,30 +34,49 @@ export async function getAllContentTypes() {
   });
 }
 
-export async function getContentTypeById(id: ContentType["id"]) {
-  return prisma.contentType.findUnique({
+export async function getCollectionById(id: Collection["id"]) {
+  return prisma.collection.findUnique({
     where: { id },
-    select: { id: true, title: true, entries: true },
+    select: {
+      id: true,
+      title: true,
+      entries: true,
+      fields: {
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          title: true,
+          handle: true,
+          type: true,
+          description: true,
+          isRequired: true,
+          sortOrder: true,
+        },
+      },
+    },
   });
 }
 
 // used in generator
-export async function getContentTypeByHandle(handle: ContentType["handle"]) {
-  return prisma.contentType.findUnique({
+export async function getCollectionByHandle(handle: Collection["handle"]) {
+  return prisma.collection.findUnique({
     where: { handle },
     select: { id: true },
   });
 }
 
-export async function createContentType(
-  contentType: Pick<ContentType, "title" | "handle"> & {
-    description?: ContentType["description"];
+export async function createCollection(
+  collection: Pick<Collection, "title"> & {
+    description?: Collection["description"];
   },
   fields: FieldData[]
 ) {
-  return prisma.contentType.create({
+  const handle = toCamelCase(collection.title);
+
+  return prisma.collection.create({
     data: {
-      ...contentType,
+      ...collection,
+      handle,
       fields: {
         create: fields,
       },
@@ -64,27 +84,25 @@ export async function createContentType(
   });
 }
 
-export async function updateContentType(
-  contentType: Pick<ContentType, "id" | "title" | "handle"> & {
-    description?: ContentType["description"];
-  }
+export async function updateCollection(
+  collection: Pick<Collection, "id" | "title" | "description">
 ) {
-  return prisma.contentType.update({
-    where: { id: contentType.id },
+  return prisma.collection.update({
+    where: { id: collection.id },
     data: {
-      title: contentType.title,
-      description: contentType.description,
+      title: collection.title,
+      description: collection.description,
     },
   });
 }
 
-export async function deleteContentTypes(
-  contentTypesToDelete: ContentType["id"][]
+export async function deleteCollections(
+  collectionsToDelete: Collection["id"][]
 ) {
-  return prisma.contentType.deleteMany({
+  return prisma.collection.deleteMany({
     where: {
       id: {
-        in: contentTypesToDelete,
+        in: collectionsToDelete,
       },
     },
   });
@@ -93,12 +111,12 @@ export async function deleteContentTypes(
 // Fields
 export async function createField(
   field: FieldData,
-  contentTypeId: ContentType["id"]
+  collectionId: Collection["id"]
 ) {
   // only create a field if content type is being updated
   return prisma.field.create({
     data: {
-      contentTypeId,
+      collectionId,
       ...field,
     },
   });
@@ -148,15 +166,15 @@ export async function getEntryById(id: Entry["id"]) {
   });
 }
 
-export async function createEntry(contentTypeId: ContentType["id"]) {
+export async function createEntry(collectionId: Collection["id"]) {
   const fields = await prisma.field.findMany({
-    where: { contentTypeId },
+    where: { collectionId },
     select: { id: true },
   });
 
   return prisma.entry.create({
     data: {
-      contentTypeId,
+      collectionId,
       fields: {
         create: fields.map((field) => ({ fieldId: field.id })),
       },
@@ -166,11 +184,11 @@ export async function createEntry(contentTypeId: ContentType["id"]) {
 
 // returns a promise for each entry
 export async function addNewFieldsToEntries(
-  contentTypeId: ContentType["id"],
+  collectionId: Collection["id"],
   fieldsToCreate: Field["id"][]
 ) {
   const entries = await prisma.entry.findMany({
-    where: { contentTypeId },
+    where: { collectionId },
   });
 
   try {

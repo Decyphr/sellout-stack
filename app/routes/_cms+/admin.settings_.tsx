@@ -1,8 +1,7 @@
-import { Button } from "@cms/components/ui/button";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Link } from "@remix-run/react";
 import { RouteTitle } from "~/cms/components/route-title";
+import { SimpleCard } from "~/cms/components/simple-card";
 
 export const loader = async ({}: LoaderArgs) => {
   return json({});
@@ -17,9 +16,9 @@ export default function SettingsRoute() {
     <div>
       <RouteTitle title="Settings" />
 
-      <Link to="config">
-        <Button>Go to Project Config</Button>
-      </Link>
+      <div className="grid gap-4 md:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <SimpleCard title="Data Model" link="data-model" />
+      </div>
     </div>
   );
 }
