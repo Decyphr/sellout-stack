@@ -1,7 +1,12 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useNavigation, useRouteLoaderData } from "@remix-run/react";
-import { AlignLeft, ToggleLeft } from "lucide-react";
+import {
+  Form,
+  Link,
+  useNavigation,
+  useRouteLoaderData,
+} from "@remix-run/react";
+import { AlignLeft, ToggleLeft, X } from "lucide-react";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { z } from "zod";
@@ -61,12 +66,13 @@ export const action = async ({ request, params }: ActionArgs) => {
 
 export default function CreateFieldRoute() {
   const navigation = useNavigation();
-  const parentData = useRouteLoaderData(
+  const { collection, fields } = useRouteLoaderData(
     "routes/_cms+/admin.settings.data-model.$id"
   ) as { collection: Collection; fields: Field[] };
 
-  const collectionTitle = parentData?.collection?.title ?? "";
-  const newFieldSortOrder = parentData?.fields?.length ?? 0;
+  if (!collection || !fields) return null;
+
+  const newFieldSortOrder = fields?.length ?? 0;
 
   const fieldTypes = ["text", "textarea", "number", "boolean", "date"];
   const [fieldType, setFieldType] = useState("");
@@ -92,9 +98,16 @@ export default function CreateFieldRoute() {
     <Sheet open={true}>
       <SheetContent position="right" size="lg">
         <SheetHeader>
-          <SheetTitle>New Field ({collectionTitle})</SheetTitle>
+          <SheetTitle>New Field ({collection.title})</SheetTitle>
           <Separator />
         </SheetHeader>
+        <Link
+          to={`/admin/settings/data-model/${collection.id}`}
+          className="absolute -left-12 top-5 bg-foreground/20 p-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </Link>
 
         <div className="my-4 grid gap-4 md:my-8 md:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <button
@@ -176,7 +189,7 @@ export default function CreateFieldRoute() {
                   className="w-full"
                   disabled={isCreatingField}
                 >
-                  {isCreatingField ? "Creating..." : "Save changes"}
+                  {isCreatingField ? "Creating..." : "Create Field"}
                 </Button>
               </SheetFooter>
             </Form>

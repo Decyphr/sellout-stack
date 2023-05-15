@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { useSubmit } from "@remix-run/react";
 import { EyeOff, GripVertical, MoreVertical, Pencil } from "lucide-react";
 import { Field } from "~/models/content.server";
 
@@ -12,13 +13,24 @@ import {
 } from "@cms/components/ui/dropdown-menu";
 
 interface CollectionFieldSettingsProps {
-  field: Pick<Field, "title" | "sortOrder">;
+  field: Pick<Field, "id" | "title" | "sortOrder" | "type" | "isRequired">;
 }
 
 const CollectionFieldSettings = React.forwardRef<
   HTMLDivElement,
   CollectionFieldSettingsProps
 >(({ field, ...props }, ref) => {
+  const submit = useSubmit();
+
+  function deleteField() {
+    const deleteFieldFormData = new FormData();
+    deleteFieldFormData.append("fieldId", field.id);
+    submit(deleteFieldFormData, {
+      action: "/resources/delete-field",
+      method: "delete",
+    });
+  }
+
   return (
     <div
       ref={ref}
@@ -47,7 +59,16 @@ const CollectionFieldSettings = React.forwardRef<
             <DropdownMenuItem>Half Width</DropdownMenuItem>
             <DropdownMenuItem>Full Width</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Delete Field</DropdownMenuItem>
+            <DropdownMenuItem>
+              <button
+                type="button"
+                onClick={deleteField}
+                name="_action"
+                value="delete-field"
+              >
+                Delete Field
+              </button>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

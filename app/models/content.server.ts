@@ -2,7 +2,7 @@ import type { Collection, Entry, Field } from "@prisma/client";
 import { toCamelCase } from "~/cms/lib/utils/formatters";
 import { prisma } from "~/db.server";
 
-export type { Collection, Entry, Field } from "@prisma/client";
+export type { Collection, Entry, Field, FieldValue } from "@prisma/client";
 
 export const FIELD_TYPES = [
   "boolean",
@@ -174,9 +174,16 @@ export async function getEntryById(id: Entry["id"]) {
     where: { id },
     include: {
       fields: {
-        select: {
-          id: true,
-          field: true,
+        include: {
+          field: {
+            select: {
+              title: true,
+              handle: true,
+              type: true,
+              isRequired: true,
+              description: true,
+            },
+          },
         },
         orderBy: { field: { sortOrder: "asc" } },
       },

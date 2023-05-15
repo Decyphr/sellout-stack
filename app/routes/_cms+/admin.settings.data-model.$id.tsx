@@ -15,6 +15,7 @@ import { RouteTitle } from "~/cms/components/route-title";
 import { Button } from "~/cms/components/ui/button";
 import {
   deleteCollections,
+  deleteFields,
   getCollectionById,
   updateCollectionFields,
 } from "~/models/content.server";
@@ -47,13 +48,32 @@ export const action = async ({ request, params }: ActionArgs) => {
   const formData = await request.formData();
   const _action = formData.get("_action");
 
-  if (_action === "delete-collection") {
-    try {
-      await deleteCollections([params.id]);
-      return redirect("/admin/settings/data-model");
-    } catch (error) {
-      console.error(error);
-      throw json({ error }, { status: 400 });
+  if (request.method === "DELETE") {
+    // delete collection, and all related entries, fields, and field values
+    if (_action === "delete-collection") {
+      try {
+        await deleteCollections([params.id]);
+        return redirect("/admin/settings/data-model");
+      } catch (error) {
+        console.error(error);
+        throw json({ error }, { status: 400 });
+      }
+    }
+
+    if (_action === "delete-field") {
+      const fieldId = formData.get("fieldId");
+      if (!fieldId || typeof fieldId !== "string") {
+        console.error("Missing fieldId");
+        throw json({ error: "Missing fieldId" }, { status: 400 });
+      }
+
+      try {
+        // delete field, and all related field values
+        await deleteFields([fieldId]);
+      } catch (error) {
+        console.error(error);
+        throw json({ error }, { status: 400 });
+      }
     }
   }
 
