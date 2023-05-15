@@ -5,7 +5,11 @@ import { Plus } from "lucide-react";
 import { RouteTitle } from "~/cms/components/route-title";
 import { SimpleCard } from "~/cms/components/simple-card";
 import { Button } from "~/cms/components/ui/button";
-import { getAllCollections, type Collection } from "~/models/content.server";
+import {
+  createCollection,
+  getAllCollections,
+  type Collection,
+} from "~/models/content.server";
 
 import {
   Sheet,
@@ -16,6 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@cms/components/ui/sheet";
+import { z } from "zod";
 import { Input } from "~/cms/components/ui/input";
 import { Label } from "~/cms/components/ui/label";
 
@@ -28,11 +33,23 @@ export const loader = async ({}: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const title = formData.get("title");
+  const description = formData.get("description");
 
-  console.log({ title });
+  const schema = z.object({
+    title: z.string().min(1),
+    description: z.string().nullable(),
+  });
 
-  // const newCollection = await createCollection();
-  return redirect("");
+  try {
+    const validCollectionData = schema.parse({ title, description });
+
+    const newCollection = await createCollection(validCollectionData);
+
+    return redirect(newCollection.id);
+  } catch (error) {
+    console.error(error);
+    throw json({ error }, { status: 400 });
+  }
 };
 
 export default function DataModelSettingsRoute() {
@@ -61,6 +78,16 @@ export default function DataModelSettingsRoute() {
                     Title
                   </Label>
                   <Input id="title" name="title" className="col-span-3" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">
+                    Description
+                  </Label>
+                  <Input
+                    id="description"
+                    name="description"
+                    className="col-span-3"
+                  />
                 </div>
               </div>
               <SheetFooter>

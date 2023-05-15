@@ -12,7 +12,7 @@ import {
 } from "@cms/components/ui/dropdown-menu";
 
 interface CollectionFieldSettingsProps {
-  field: Field;
+  field: Pick<Field, "title" | "sortOrder">;
 }
 
 const CollectionFieldSettings = React.forwardRef<

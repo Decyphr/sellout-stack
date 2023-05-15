@@ -34,8 +34,8 @@ model Collection {
   handle        String     @unique
   description   String?    @default("")
   
-  fields            Field[]
-  entries           Entry[]
+  fields        Field[]
+  entries       Entry[]
 }
 
 // Define the model for fields
@@ -55,8 +55,8 @@ model Field {
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  options       FieldOptions[]
-  values        FieldValue[]
+  options      FieldOptions[]
+  values       FieldValue[]
 
   @@unique([collectionId, handle])
 }
@@ -84,8 +84,10 @@ model Entry {
 model FieldValue {
   id      Int       @id @default(autoincrement())
 
-  fieldId String
-  field   Field     @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  textValue   String?  @default("")
+
+  fieldId     String
+  field       Field     @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   entryId String
   entry   Entry     @relation(fields: [entryId], references: [id], onDelete: Cascade, onUpdate: Cascade)

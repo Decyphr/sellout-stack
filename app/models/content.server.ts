@@ -15,10 +15,11 @@ export const FIELD_TYPES = [
   "relation",
 ];
 
-type FieldData = Pick<Field, "title" | "handle" | "type" | "sortOrder"> & {
-  description?: Field["description"];
-  isRequired?: Field["isRequired"];
-};
+type FieldData = Pick<
+  Field,
+  "title" | "type" | "sortOrder" | "description" | "isRequired"
+>;
+
 // Content Type
 export async function getAllCollections() {
   return prisma.collection.findMany({
@@ -46,9 +47,7 @@ export async function getCollectionById(id: Collection["id"]) {
         select: {
           id: true,
           title: true,
-          handle: true,
           type: true,
-          description: true,
           isRequired: true,
           sortOrder: true,
         },
@@ -66,10 +65,7 @@ export async function getCollectionByHandle(handle: Collection["handle"]) {
 }
 
 export async function createCollection(
-  collection: Pick<Collection, "title"> & {
-    description?: Collection["description"];
-  },
-  fields: FieldData[]
+  collection: Pick<Collection, "title" | "description">
 ) {
   const handle = toCamelCase(collection.title);
 
@@ -77,9 +73,6 @@ export async function createCollection(
     data: {
       ...collection,
       handle,
-      fields: {
-        create: fields,
-      },
     },
   });
 }
@@ -92,6 +85,23 @@ export async function updateCollection(
     data: {
       title: collection.title,
       description: collection.description,
+    },
+  });
+}
+
+export async function updateCollectionFields(
+  collectionId: Collection["id"],
+  fieldsToUpdate: Pick<Field, "id" | "sortOrder">[]
+) {
+  return prisma.collection.update({
+    where: { id: collectionId },
+    data: {
+      fields: {
+        updateMany: fieldsToUpdate.map((field) => ({
+          where: { id: field.id },
+          data: { sortOrder: field.sortOrder },
+        })),
+      },
     },
   });
 }
@@ -113,11 +123,21 @@ export async function createField(
   field: FieldData,
   collectionId: Collection["id"]
 ) {
+  const handle = toCamelCase(field.title);
+
+  const existingContentEntries = await prisma.entry.findMany({
+    where: { collectionId },
+  });
+
   // only create a field if content type is being updated
   return prisma.field.create({
     data: {
       collectionId,
+      handle,
       ...field,
+      values: {
+        create: existingContentEntries.map((entry) => ({ entryId: entry.id })),
+      },
     },
   });
 }
@@ -130,7 +150,6 @@ export async function updateField(
     where: { id: fieldId },
     data: {
       title: fieldToUpdate.title,
-      handle: fieldToUpdate.handle,
       type: fieldToUpdate.type,
       description: fieldToUpdate.description,
       isRequired: fieldToUpdate.isRequired,
@@ -153,8 +172,7 @@ export async function deleteFields(fieldsToDelete: Field["id"][]) {
 export async function getEntryById(id: Entry["id"]) {
   return prisma.entry.findUnique({
     where: { id },
-    select: {
-      id: true,
+    include: {
       fields: {
         select: {
           id: true,
@@ -182,32 +200,6 @@ export async function createEntry(collectionId: Collection["id"]) {
   });
 }
 
-// returns a promise for each entry
-export async function addNewFieldsToEntries(
-  collectionId: Collection["id"],
-  fieldsToCreate: Field["id"][]
-) {
-  const entries = await prisma.entry.findMany({
-    where: { collectionId },
-  });
-
-  try {
-    await Promise.all(
-      entries.map((entry) =>
-        prisma.entry.update({
-          where: { id: entry.id },
-          data: {
-            fields: {
-              create: fieldsToCreate.map((fieldId) => ({ fieldId })),
-            },
-          },
-        })
-      )
-    );
-
-    return;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Error adding new fields to entries");
-  }
+export async function deleteEntry(entryId: Entry["id"]) {
+  return prisma.entry.delete({ where: { id: entryId } });
 }
