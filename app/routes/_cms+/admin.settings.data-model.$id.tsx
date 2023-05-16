@@ -10,7 +10,6 @@ import {
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
-import { CollectionFieldSettings } from "~/cms/components/collection-field-settings";
 import { RouteTitle } from "~/cms/components/route-title";
 import { Button } from "~/cms/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import {
   getCollectionById,
   updateCollectionFields,
 } from "~/models/content.server";
+import { DeleteField } from "~/routes/resources+/delete-field";
 
 // drag and drop
 import {
@@ -28,7 +28,7 @@ import {
   type DropResult,
 } from "@hello-pangea/dnd";
 
-import { Plus } from "lucide-react";
+import { GripVertical, Pencil, Plus, X } from "lucide-react";
 import { z } from "zod";
 
 export const loader = async ({ params }: LoaderArgs) => {
@@ -216,12 +216,31 @@ export default function CollectionSettingsRoute() {
                     index={index}
                   >
                     {(provided) => (
-                      <CollectionFieldSettings
+                      <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        field={field}
-                      />
+                        className="flex justify-between items-center p-4 bg-foreground/10 hover:bg-foreground/20 text-foreground/80 hover:text-foreground transition-colors cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="flex items-center justify-start space-x-4">
+                          <GripVertical className="w-5 h-5" />
+                          <p>
+                            {field.title} - {field.sortOrder}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-end space-x-4">
+                          <Link to={field.id}>
+                            <Button variant="ghost" size="sm">
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <DeleteField id={field.id}>
+                            <Button variant="destructive" size="sm">
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </DeleteField>
+                        </div>
+                      </div>
                     )}
                   </Draggable>
                 ))}
@@ -231,7 +250,7 @@ export default function CollectionSettingsRoute() {
           </Droppable>
         </DragDropContext>
         <div>
-          <Link to="create-field">
+          <Link to="create">
             <Button variant="ghost" className="w-full">
               <Plus className="w-5 h-5 mr-2" /> Create Field
             </Button>
