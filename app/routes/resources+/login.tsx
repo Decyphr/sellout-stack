@@ -102,7 +102,6 @@ export function InlineLogin({
     onValidate({ formData }) {
       return parse(formData, { schema: LoginFormSchema });
     },
-    shouldRevalidate: "onBlur",
   });
 
   return (
@@ -136,8 +135,6 @@ export function InlineLogin({
           </label>
         </div>
         <input value={redirectTo} {...fields.redirectTo} type="hidden" />
-        <ErrorList errors={formError ? [formError] : []} />
-        <ErrorList errors={form.errors} id={form.errorId} />
         <Button
           type="submit"
           disabled={loginFetcher.state !== "idle"}
@@ -145,6 +142,8 @@ export function InlineLogin({
         >
           Log in
         </Button>
+        <ErrorList errors={formError ? [formError] : []} />
+        <ErrorList errors={form.errors} id={form.errorId} />
       </loginFetcher.Form>
     </div>
   );

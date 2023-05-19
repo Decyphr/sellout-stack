@@ -10,6 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id   String @id @unique @default(cuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id   String @id @unique @default(cuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles       Role[]
+
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+}
+
 model User {
   id        String  @id @default(cuid())
   email     String  @unique
@@ -18,7 +43,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   password Password?
+  roles    Role[]
 }
 
 model Password {
@@ -39,6 +66,7 @@ model Collection {
   
   fields        Field[]
   entries       Entry[]
+  permissions   Permission[]
 }
 
 // Define the model for fields
@@ -84,13 +112,17 @@ model Entry {
   collectionId String
   collection   Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  fields        FieldValue[]
+  fields       FieldValue[]
 }
 
 model FieldValue {
   id          String   @id @default(cuid())
 
-  textValue   String?  @default("")
+  textValue     String?  @default("")
+  booleanValue  Boolean? @default(false)
+
+  mediaValueId  String?
+  mediaValue    Media?   @relation(fields: [mediaValueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   fieldId     String
   field       Field     @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -99,4 +131,18 @@ model FieldValue {
   entry   Entry     @relation(fields: [entryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([fieldId, entryId])
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  
+  mediaType   String
+  title       String
+  altText     String?
+  url         String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  fieldValues FieldValue[]
 }

@@ -1,9 +1,10 @@
 import { DataFunctionArgs, json, redirect } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { Field } from "~/models/content.server";
-import { requireUserId } from "~/services/auth.server";
 import { prisma } from "~/services/db.server";
 
+import { parse } from "@conform-to/zod";
+import { z } from "zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,26 +18,28 @@ import {
 } from "~/components/ui/alert-dialog";
 import useSpinDelay from "~/utils/spin-delay";
 
-export const loader = async ({ request }: DataFunctionArgs) => {
-  if (request.method === "GET") return redirect("/");
-};
+const DeleteFieldSchema = z.object({
+  fieldId: z.string().min(1),
+});
 
 export const action = async ({ request }: DataFunctionArgs) => {
-  const userId = await requireUserId(request);
-  if (!userId) return redirect("/");
+  const formData = await request.clone().formData();
 
-  const formData = await request.formData();
+  const submission = parse(formData, { schema: DeleteFieldSchema });
 
-  const fieldId = formData.get("fieldId");
-
-  // TODO: Add Zod/Conform validation
-  if (!fieldId || typeof fieldId !== "string") {
-    console.error("Missing fieldId");
-    throw json({ error: "Missing fieldId" }, { status: 400 });
+  if (!submission.value || submission.intent !== "submit") {
+    console.log("Invalid submission");
+    return json(
+      {
+        status: "error",
+        submission,
+      } as const,
+      { status: 400 }
+    );
   }
 
   const field = await prisma.field.findFirst({
-    where: { id: fieldId },
+    where: { id: submission.value.fieldId },
     include: { collection: { select: { id: true } } },
   });
 

@@ -210,7 +210,7 @@ export default function CollectionSettingsRoute() {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="grid grid-cols-1 gap-4"
+                className="flex flex-col space-y-4"
               >
                 {fieldLayout.map((field, index) => (
                   <Draggable
@@ -223,7 +223,7 @@ export default function CollectionSettingsRoute() {
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className="flex justify-between items-center p-4 bg-foreground/10 hover:bg-foreground/20 text-foreground/80 hover:text-foreground transition-colors cursor-grab active:cursor-grabbing"
+                        className="rounded-sm flex justify-between items-center p-4 bg-foreground/10 hover:bg-foreground/20 text-foreground/80 hover:text-foreground transition-colors cursor-grab active:cursor-grabbing"
                       >
                         <div className="flex items-center justify-start space-x-4">
                           <GripVertical className="w-5 h-5" />

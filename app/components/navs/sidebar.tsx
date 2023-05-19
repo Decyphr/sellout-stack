@@ -47,10 +47,11 @@ const SideBarLink = ({
   children: React.ReactNode;
 }) => {
   const baseClass =
-    "flex-1 font-light transition-colors p-2 focus:bg-foreground/20 focus:text-primary";
-  const linkClass = "text-primary/80 hover:text-primary hover:bg-foreground/5";
+    "flex-1 rounded-sm font-light transition-colors p-2 focus:bg-foreground focus:text-background";
+  const linkClass =
+    "text-primary/80 hover:text-foreground hover:bg-foreground/10";
 
-  const activeLinkClass = "text-primary bg-foreground/20";
+  const activeLinkClass = "text-background bg-foreground";
 
   return (
     <li className="relative mt-3 flex">

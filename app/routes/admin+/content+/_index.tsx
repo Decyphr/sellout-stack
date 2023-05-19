@@ -32,7 +32,7 @@ export default function ContentRoute() {
           <SimpleCard
             key={collection.id}
             title={collection.title}
-            link={collection.id}
+            link={collection.handle}
           />
         ))}
       </div>

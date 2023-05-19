@@ -4,7 +4,7 @@ import { Form, Link, Outlet, useSubmit } from "@remix-run/react";
 import { LayersIcon } from "lucide-react";
 import Sidebar from "~/components/navs/sidebar";
 import UserAvatar from "~/components/user-avatar";
-import { requireUserId } from "~/services/auth.server";
+import { authenticator } from "~/services/auth.server";
 
 import {
   DropdownMenu,
@@ -15,10 +15,24 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 import { Toaster } from "~/components/ui/toaster";
+import { prisma } from "~/services/db.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const user = await requireUserId(request);
-  if (!user) return redirect("/login");
+  const userId = await authenticator.isAuthenticated(request);
+
+  const user = userId
+    ? await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, username: true, email: true },
+      })
+    : null;
+
+  if (userId && !user) {
+    console.info("something weird happened");
+    // something weird happened... The user is authenticated but we can't find
+    // them in the database. Maybe they were deleted? Let's log them out.
+    await authenticator.logout(request, { redirectTo: "/" });
+  }
 
   return json({ user });
 };

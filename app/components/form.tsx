@@ -1,5 +1,6 @@
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import type { Field, FieldValue } from "~/models/content.server";
 
 /*
@@ -18,10 +19,10 @@ export function ErrorList({
   const errorsToRender = errors?.filter(Boolean);
   if (!errorsToRender?.length) return null;
   return (
-    <ul id={id} className="space-y-1">
-      {errorsToRender.map((e) => (
-        <li key={e} className="text-[10px] text-accent-red">
-          {e}
+    <ul id={id} className="bg-red-500/20 p-2 mt-2 mb-4 rounded-sm space-y-1">
+      {errorsToRender.map((err) => (
+        <li key={err} className="text-xs text-red-500">
+          <em>{err}</em>
         </li>
       ))}
     </ul>
@@ -66,9 +67,7 @@ export function Field({
         required={required}
         type={type}
       />
-      <div className="px-4 pb-3 pt-1">
-        {errorId ? <ErrorList id={errorId} errors={errors} /> : null}
-      </div>
+      <div>{errorId ? <ErrorList id={errorId} errors={errors} /> : null}</div>
     </div>
   );
 }
@@ -78,24 +77,42 @@ export function Field({
  */
 
 type DynamicFieldProps = {
-  fields: Array<
-    Pick<FieldValue, "id" | "textValue"> & {
-      field: Pick<Field, "title" | "type" | "isRequired">;
-    }
-  >;
+  field: Pick<Field, "title" | "type" | "isRequired">;
+  value: Pick<FieldValue, "id" | "textValue" | "booleanValue">;
+  errors?: ListOfErrors;
 };
 
-export function DynamicFieldRenderer({ fields }: DynamicFieldProps) {
+export function DynamicFieldRenderer({
+  field,
+  value,
+  errors,
+}: DynamicFieldProps) {
+  const errorId = errors?.length ? `${value.id}-error` : undefined;
+
   return (
     <>
-      {/*  {fields.map((fieldValue) => {
-        switch (fieldValue.field.type) {
-          case "text":
-            return (
-              
-            );
-        }
-      })} */}
+      {field.type === "text" ? (
+        <Field
+          id="username"
+          label="Username"
+          errors={errors}
+          defaultValue={value.textValue ?? ""}
+          required={field.isRequired ?? false}
+        />
+      ) : field.type === "boolean" ? (
+        <div>
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="airplane-mode">{field.title}</Label>
+            <Switch
+              id="airplane-mode"
+              defaultChecked={value.booleanValue ?? false}
+            />
+          </div>
+          <div>
+            {errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

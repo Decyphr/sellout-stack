@@ -4,6 +4,7 @@ import {
   type V2_MetaFunction,
 } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { LayersIcon } from "lucide-react";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { authenticator } from "~/services/auth.server";
 import { commitSession, getSession } from "~/services/session.server";
@@ -40,13 +41,13 @@ export default function LoginPage() {
   const redirectTo = searchParams.get("redirectTo") || "/admin";
 
   return (
-    <div className="flex min-h-full flex-col justify-center pb-32 pt-20">
+    <div className="flex min-h-screen flex-col justify-center pb-32 pt-20 overflow-hidden">
       <div className="mx-auto w-full max-w-md">
-        <div className="flex flex-col gap-3 text-center">
-          <h1 className="text-h1">Welcome back!</h1>
-          <p className="text-body-md text-night-200">
-            Please enter your details.
-          </p>
+        <div className="text-center">
+          <h1 className="text-4xl text-white mb-2 inline-flex">
+            <LayersIcon className="w-8 h-8 m-auto mb-4 mr-4 text-emerald-400" />
+            ForgeCMS
+          </h1>
         </div>
         <InlineLogin redirectTo={redirectTo} formError={data.formError} />
       </div>
