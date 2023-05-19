@@ -1,48 +1,29 @@
-// drag and drop
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  type DropResult,
-} from "@hello-pangea/dnd";
+import type { DataFunctionArgs } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { forge } from "~/services/forge";
+
+export const loader = async ({}: DataFunctionArgs) => {
+  const content = await forge.collection("pages");
+
+  if (!content) throw json({ status: 404 });
+
+  return json({ content });
+};
+
+export const action = async ({}: DataFunctionArgs) => {
+  return redirect("");
+};
 
 export default function TestRoute() {
-  const onDragEnd = (result: DropResult) => {
-    console.log(result);
-  };
-
-  const items = [
-    { id: "1", content: "Item 1" },
-    { id: "2", content: "Item 2" },
-    { id: "3", content: "Item 3" },
-    { id: "4", content: "Item 4" },
-    { id: "5", content: "Item 5" },
-  ];
+  const { content } = useLoaderData<typeof loader>();
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="fields">
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
-            <div className="max-w-5xl grid grid-cols-1 gap-4">
-              {items.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="bg-white shadow overflow-hidden sm:rounded-md"
-                    >
-                      <h3>{item.content}</h3>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-            </div>
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="py-16 max-w-7xl mx-auto">
+      <h1>Forge Client:</h1>
+      <div className="mt-8 bg-foreground/10 p-4 rounded-md">
+        <pre>{JSON.stringify(content, null, 2)}</pre>
+      </div>
+    </div>
   );
 }

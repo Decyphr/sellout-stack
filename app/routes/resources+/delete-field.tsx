@@ -1,7 +1,8 @@
 import { DataFunctionArgs, json, redirect } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { prisma } from "~/db.server";
-import { requireUserId } from "~/session.server";
+import { Field } from "~/models/content.server";
+import { requireUserId } from "~/services/auth.server";
+import { prisma } from "~/services/db.server";
 
 import {
   AlertDialog,
@@ -13,20 +14,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@cms/components/ui/alert-dialog";
+} from "~/components/ui/alert-dialog";
+import useSpinDelay from "~/utils/spin-delay";
 
 export const loader = async ({ request }: DataFunctionArgs) => {
-  console.log(request.method);
-
   if (request.method === "GET") return redirect("/");
 };
 
 export const action = async ({ request }: DataFunctionArgs) => {
   const userId = await requireUserId(request);
+  if (!userId) return redirect("/");
+
   const formData = await request.formData();
 
   const fieldId = formData.get("fieldId");
 
+  // TODO: Add Zod/Conform validation
   if (!fieldId || typeof fieldId !== "string") {
     console.error("Missing fieldId");
     throw json({ error: "Missing fieldId" }, { status: 400 });
@@ -67,7 +70,7 @@ export function DeleteField({
   id,
   children,
 }: {
-  id: string;
+  id: Field["id"];
   children: React.ReactNode;
 }) {
   const deleteFieldFetcher = useFetcher<typeof action>();
@@ -75,9 +78,11 @@ export function DeleteField({
   const deleteField = () => {
     deleteFieldFetcher.submit(
       { fieldId: id },
-      { method: "post", action: "/resources/delete-field" }
+      { method: "delete", action: "/resources/delete-field" }
     );
   };
+
+  const isDeleting = useSpinDelay(deleteFieldFetcher.state === "submitting");
 
   return (
     <AlertDialog>
@@ -95,9 +100,7 @@ export function DeleteField({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={deleteField}>
-            {deleteFieldFetcher.state === "submitting"
-              ? "Deleting..."
-              : "Delete"}
+            {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

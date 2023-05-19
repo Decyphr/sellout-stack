@@ -1,6 +1,6 @@
 import type { Collection, Entry, Field } from "@prisma/client";
-import { toCamelCase } from "~/cms/lib/utils/formatters";
-import { prisma } from "~/db.server";
+import { prisma } from "~/services/db.server";
+import { toCamelCase } from "~/utils/formatters";
 
 export type { Collection, Entry, Field, FieldValue } from "@prisma/client";
 
@@ -197,8 +197,13 @@ export async function createEntry(collectionId: Collection["id"]) {
     select: { id: true },
   });
 
+  const title = "Untitled Entry";
+  const slug = toCamelCase(title);
+
   return prisma.entry.create({
     data: {
+      title,
+      slug,
       collectionId,
       fields: {
         create: fields.map((field) => ({ fieldId: field.id })),
